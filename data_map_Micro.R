@@ -20,16 +20,16 @@ mapviewOptions(fgb = FALSE)
 # Upload dataset
 
 FDI <- read.csv("FDI_harmonized.csv")
-#WBES <- read.dta13("Micro/Results/WBES_final.dta")
+WBES <- read.dta13("Micro/Results/WBES_final.dta")
 
 # Append WBES data onto FDI dataset
 
 # Convert dataframe in a sf object. Firstly, we should drop rows without coordinates.
 
-FDI_clean <- FDI[!is.na(FDI$g_lon),]
+FDI_clean <- FDI[!is.na(FDI$oc_lng),]
 
 FDI_sf <- st_as_sf(FDI_clean,
-                   coords = c("g_lon", "g_lat"),
+                   coords = c("oc_lng", "oc_lat"),
                    crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
 rm(FDI_clean)
 # Create variable for NUMBER OF PROJECTS IN A CITY
@@ -41,9 +41,6 @@ FDI_sf$n_proj <- 1
 plot(FDI_sf["fdi_jobs"])
 mapview(FDI_sf["fdi_jobs"])
 
-# Drop point in Australia!
-
-FDI_sf <- st_crop(FDI_sf, xmin=-24.98638, xmax=58, ymin=-34.23, ymax=37.27442)
 
 
 ##### Set up spatial point datasets with aggregate variables ########################################################################################################################
@@ -109,9 +106,9 @@ FDI_sf_wide$main_code <- names(FDI_sf_wide_ng)[2:50][max.col(FDI_sf_wide_ng[2:50
 rm(FDI_sf_wide_ng)
 
 # Create label for interactive map (pop up query)
-FDI_label <- st_difference(FDI_sf)
+FDI_label <- st_difference(FDI_sf_wide)
 
-FDI_sf_wide <- FDI_sf_wide %>%mutate(popup_info = paste("Country:", FDI_label$country, "<br/>", "Region:", FDI_label$region,"<br/>" , "City:", FDI_label$city, "<br/>","Number of projects:", total, "<br/>", "Main product sector (ISIC): ", FDI_sf_wide$main_code))
+FDI_sf_wide <- FDI_sf_wide %>%mutate(popup_info = paste("Country:", FDI_label$country, "<br/>", "Region:", FDI_label$region,"<br/>" , "City:", FDI_label$city, "<br/>","Number of projects:", total, "<br/>", "Main product sector (ISIC): ", FDI_sf_wide$main_code)) 
 FDI_sf_wide$popup_info
 FDI_sf_wide$country <- FDI_label$country
 
@@ -150,6 +147,8 @@ m2
 
 mapshot(m1, url = paste0(getwd(), "/map1.html"))
 mapshot(m2, url = paste0(getwd(), "/map2.html"))
+
+
 
 
 
